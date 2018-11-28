@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import axios from "axios";
+import loadingGif from "./media/loading.gif";
 import "./App.css";
 
 class App extends Component {
@@ -18,6 +19,7 @@ class App extends Component {
 
 	componentDidMount() {
 		this.getDataFromUrl();
+		this.getCardsFromServer();
 	}
 
 	setCard(card) {
@@ -36,18 +38,19 @@ class App extends Component {
 
 	getCardsFromServer() {
 		axios.get("/api/favorites").then((response) => {
+			console.log(response);
 			this.setState({
 				favoritesList: response.data
 			});
 		});
 	}
 
-	postUserCardToOurServer() {
+	postUserCardToTheServer() {
 		// only saving url but have potential to save whatever we want from the card
 		const savedCard = {
 			imageUrl: this.state.selectedCard
 		};
-		axios.post("/api/add_to_favorites", savedCard).then((response) => {
+		axios.post("/api/favorites", savedCard).then((response) => {
 			this.setState({
 				favoritesList: response.data
 			});
@@ -59,17 +62,16 @@ class App extends Component {
 			imageUrl: this.state.selectedCard
 		};
 
-		axios
-			.put(`/api/add_to_favorites/${id}`, updatedCard)
-			.then((response) => {
-				this.setState({
-					favoritesList: response.data
-				});
+		axios.put(`/api/favorites/${id}`, updatedCard).then((response) => {
+			this.setState({
+				favoritesList: response.data
 			});
+		});
 	}
 
 	deleteCardFromServer(id) {
-		axios.delete(`/api/delete_from_favorites/${id}`).then((response) => {
+		console.log(id);
+		axios.delete(`/api/favorites/${id}`).then((response) => {
 			this.setState({
 				favoritesList: response.data
 			});
@@ -77,25 +79,52 @@ class App extends Component {
 	}
 
 	render() {
-		const { stuff, selectedCard } = this.state;
+		const { stuff, selectedCard, favoritesList } = this.state;
 
-		const myCards = stuff.map((card) => {
+		const pokeCards = stuff.length ? (
+			stuff.map((card) => {
+				return (
+					<img
+						key={card.imageUrl}
+						onClick={() => {
+							this.setCard(card);
+						}}
+						src={card.imageUrl}
+					/>
+				);
+			})
+		) : (
+			<img src={loadingGif} />
+		);
+
+		const myFavorites = favoritesList.map((card) => {
 			return (
-				<img
-					onClick={() => {
-						this.setCard(card);
-					}}
-					src={card.imageUrl}
-				/>
+				<span key={card.id}>
+					<img src={card.imageUrl} />
+					<button onClick={() => this.deleteCardFromServer(card.id)}>
+						delete
+					</button>
+					<button onClick={() => this.updateCardOnServer(card.id)}>
+						update with selected
+					</button>
+				</span>
 			);
 		});
 
 		return (
 			<div className="App">
 				<div>
-					<img src={selectedCard} />
+					<div>{myFavorites}</div>
+					<div>
+						<img src={selectedCard} />
+						<div>
+							<button onClick={this.postUserCardToTheServer}>
+								Add
+							</button>
+						</div>
+					</div>
 				</div>
-				{myCards}
+				{pokeCards}
 			</div>
 		);
 	}
