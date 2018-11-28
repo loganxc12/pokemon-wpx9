@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import axios from "axios";
 import loadingGif from "./media/loading.gif";
 import "./App.css";
+import { createDecipher } from "crypto";
 
 class App extends Component {
 	constructor(props) {
@@ -9,12 +10,15 @@ class App extends Component {
 		this.state = {
 			stuff: [],
 			selectedCard: null,
-			favoritesList: []
+			favoritesList: [],
+			selectedName: "",
+			searchTerm: ""
 		};
 		this.getDataFromUrl = this.getDataFromUrl.bind(this);
 		this.postUserCardToTheServer = this.postUserCardToTheServer.bind(this);
 		this.getCardsFromServer = this.getCardsFromServer.bind(this);
 		this.updateCardOnServer = this.updateCardOnServer.bind(this);
+		this.search = this.search.bind(this);
 	}
 
 	componentDidMount() {
@@ -24,7 +28,8 @@ class App extends Component {
 
 	setCard(card) {
 		this.setState({
-			selectedCard: card.imageUrl
+			selectedCard: card.imageUrl,
+			selectedName: card.name
 		});
 	}
 
@@ -48,7 +53,8 @@ class App extends Component {
 	postUserCardToTheServer() {
 		// only saving url but have potential to save whatever we want from the card
 		const savedCard = {
-			imageUrl: this.state.selectedCard
+			imageUrl: this.state.selectedCard,
+			name: this.state.selectedName
 		};
 		axios.post("/api/favorites", savedCard).then((response) => {
 			this.setState({
@@ -74,6 +80,15 @@ class App extends Component {
 		axios.delete(`/api/favorites/${id}`).then((response) => {
 			this.setState({
 				favoritesList: response.data
+			});
+		});
+	}
+
+	search(value) {
+		axios.get(`/api/search?name=${value}`).then((response) => {
+			this.setState({
+				favoritesList: response.data,
+				searchTerm: value
 			});
 		});
 	}
@@ -114,6 +129,15 @@ class App extends Component {
 		return (
 			<div className="App">
 				<div>
+					<span>
+						Search
+						<input
+							value={this.state.searchTerm}
+							onChange={(e) => {
+								this.search(e.target.value);
+							}}
+						/>
+					</span>
 					<div>{myFavorites}</div>
 					<div>
 						<img src={selectedCard} />

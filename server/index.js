@@ -12,16 +12,17 @@ app.get("/api/favorites", (req, res) => {
 });
 
 app.post("/api/favorites", (req, res) => {
-	const { imageUrl } = req.body;
+	const { imageUrl, name } = req.body;
 	const newFavorite = {
-		id,
-		imageUrl
+		id: id,
+		imageUrl: imageUrl,
+		name: name.toLowerCase()
 	};
 
 	if (favorites.length < 6) {
 		favorites.push(newFavorite);
 		id++;
-
+		console.log(favorites);
 		res.status(200).send(favorites);
 	} else {
 		res.status(403).send(
@@ -47,13 +48,26 @@ app.delete("/api/favorites/:id", (req, res) => {
 	const { id } = req.params;
 	favorites = favorites.filter((card) => {
 		// console.log("line 51", card.id !== +id);
-		if (card.id !== parseInt(id)) {
-			return card;
-		}
+		return card.id !== parseInt(id);
 	});
 
 	console.log(favorites);
 	res.status(200).send(favorites);
+});
+
+app.get("/api/search", (req, res) => {
+	const { name } = req.query;
+	let searched = name.toLowerCase();
+	let filteredList = favorites.filter((card) => {
+		return card.name.includes(searched);
+	});
+	console.log(filteredList);
+
+	if (name) {
+		res.status(200).send(filteredList);
+	} else {
+		res.status(200).send(favorites);
+	}
 });
 
 const PORT = 4000;
