@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import axios from "axios";
 import loadingGif from "./media/loading.gif";
 import "./App.css";
-import { createDecipher } from "crypto";
 
 class App extends Component {
 	constructor(props) {
@@ -51,7 +50,6 @@ class App extends Component {
 	}
 
 	postUserCardToTheServer() {
-		// only saving url but have potential to save whatever we want from the card
 		const savedCard = {
 			imageUrl: this.state.selectedCard,
 			name: this.state.selectedName
@@ -65,7 +63,8 @@ class App extends Component {
 
 	updateCardOnServer(id) {
 		const updatedCard = {
-			imageUrl: this.state.selectedCard
+			imageUrl: this.state.selectedCard,
+			name: this.state.selectedName
 		};
 
 		axios.put(`/api/favorites/${id}`, updatedCard).then((response) => {

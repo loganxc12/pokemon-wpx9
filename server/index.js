@@ -32,12 +32,13 @@ app.post("/api/favorites", (req, res) => {
 });
 
 app.put("/api/favorites/:id", (req, res) => {
-	const { imageUrl } = req.body;
+	const { imageUrl, name } = req.body;
 	const { id } = req.params;
 
 	favorites.forEach((card) => {
 		if (card.id === parseInt(id)) {
 			card.imageUrl = imageUrl;
+			card.name = name.toLowerCase();
 		}
 	});
 
@@ -59,9 +60,13 @@ app.get("/api/search", (req, res) => {
 	const { name } = req.query;
 	let searched = name.toLowerCase();
 	let filteredList = favorites.filter((card) => {
+		console.log(
+			"card.name.includes(searched);",
+			card.name.includes(searched)
+		);
+		console.log("card.name", card.name, name);
 		return card.name.includes(searched);
 	});
-	console.log(filteredList);
 
 	if (name) {
 		res.status(200).send(filteredList);
